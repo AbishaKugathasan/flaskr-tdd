@@ -1,22 +1,18 @@
-from pathlib import Path 
+from pathlib import Path
 from project.app import app, db, login_required
-import os
 import pytest
 import json
-from flask import Flask, g, render_template, request, session, jsonify
+from flask import g, jsonify
 
 DATABASE = "flaskr.db"
+
 
 def test_index():
     tester = app.test_client()
     response = tester.get("/", content_type="html/text")
-
     assert response.status_code == 200
     assert response.data == b"Hello, World!"
 
-# Checks if the file 'flask.db' exists within the directory 
-def test_database(): 
-    assert Path("flaskr.db").is_file()
 
 TEST_DB = "test.db"
 
@@ -27,11 +23,11 @@ def client():
     app.config["TESTING"] = True
     app.config["DATABASE"] = BASE_DIR.joinpath(TEST_DB)
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{BASE_DIR.joinpath(TEST_DB)}"
-
     with app.app_context():
         db.create_all()  # setup
         yield app.test_client()  # tests run here
         db.drop_all()  # teardown
+
 
 def login(client, username, password):
     """Login helper function"""
@@ -41,19 +37,16 @@ def login(client, username, password):
         follow_redirects=True,
     )
 
-@app.route('/protected')
+
+@app.route("/protected")
 @login_required
 def protected_route():
-    return jsonify({'status': 1, 'message': 'Access granted'})
+    return jsonify({"status": 1, "message": "Access granted"})
+
 
 def logout(client):
     """Logout helper function"""
     return client.get("/logout", follow_redirects=True)
-
-
-def test_index(client):
-    response = client.get("/", content_type="html/text")
-    assert response.status_code == 200
 
 
 def test_database(client):
@@ -92,6 +85,7 @@ def test_messages(client):
     assert b"&lt;Hello&gt;" in rv.data
     assert b"<strong>HTML</strong> allowed here" in rv.data
 
+
 def test_delete_message(client):
     """Ensure the messages are being deleted"""
     rv = client.get("/delete/1")
@@ -102,17 +96,17 @@ def test_delete_message(client):
     data = json.loads(rv.data)
     assert data["status"] == 1
 
+
 def test_search(client):
-    rv = client.get('/search/')
-    assert rv.status_code == 200 
+    rv = client.get("/search/")
+    assert rv.status_code == 200
+
 
 def test_loggedIn(client):
     """Test accessing the protected route when the user is logged in."""
     login(client, app.config["USERNAME"], app.config["PASSWORD"])
-
-    rv = client.get('/protected')  # Make a GET request to the protected route
+    rv = client.get("/protected")  # Make a GET request to the protected route
     data = json.loads(rv.data)
-    
     assert rv.status_code == 200  # Check for successful response
-    assert data['status'] == 1     # Check for access granted message
-    assert data['message'] == 'Access granted'
+    assert data["status"] == 1  # Check for access granted message
+    assert data["message"] == "Access granted"
