@@ -1,4 +1,5 @@
 import os
+import sqlite3
 from pathlib import Path
 from flask import (
     Flask,
@@ -14,11 +15,8 @@ from flask import (
 )
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
-from dotenv import load_dotenv
 
 basedir = Path(__file__).resolve().parent
-
-load_dotenv()
 
 # configuration
 DATABASE = "flaskr.db"

@@ -6,4 +6,3 @@ black
 flake8
 pytest
 waitress==2.1.2
-dotenv
