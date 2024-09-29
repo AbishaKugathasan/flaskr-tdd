@@ -20,7 +20,6 @@ def test_database():
 
 TEST_DB = "test.db"
 
-
 @pytest.fixture
 def client():
     BASE_DIR = Path(__file__).resolve().parent.parent
@@ -92,6 +91,7 @@ def test_messages(client):
     assert b"&lt;Hello&gt;" in rv.data
     assert b"<strong>HTML</strong> allowed here" in rv.data
 
+
 def test_delete_message(client):
     """Ensure the messages are being deleted"""
     rv = client.get("/delete/1")
@@ -110,9 +110,8 @@ def test_loggedIn(client):
     """Test accessing the protected route when the user is logged in."""
     login(client, app.config["USERNAME"], app.config["PASSWORD"])
 
-    rv = client.get('/protected')  # Make a GET request to the protected route
+    rv = client.get('/protected')  
     data = json.loads(rv.data)
-    
-    assert rv.status_code == 200  # Check for successful response
-    assert data['status'] == 1     # Check for access granted message
+    assert rv.status_code == 200  
+    assert data['status'] == 1     
     assert data['message'] == 'Access granted'
