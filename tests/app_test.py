@@ -1,11 +1,11 @@
-from pathlib import Path 
+from pathlib import Path
 from project.app import app, db, login_required
-import os
 import pytest
+from flask import jsonify
 import json
-from flask import Flask, g, render_template, request, session, jsonify
 
 DATABASE = "flaskr.db"
+
 
 def test_index():
     tester = app.test_client()
@@ -14,11 +14,9 @@ def test_index():
     assert response.status_code == 200
     assert response.data == b"Hello, World!"
 
-# Checks if the file 'flask.db' exists within the directory 
-def test_database(): 
-    assert Path("flaskr.db").is_file()
 
 TEST_DB = "test.db"
+
 
 @pytest.fixture
 def client():
@@ -32,6 +30,7 @@ def client():
         yield app.test_client()  # tests run here
         db.drop_all()  # teardown
 
+
 def login(client, username, password):
     """Login helper function"""
     return client.post(
@@ -40,19 +39,16 @@ def login(client, username, password):
         follow_redirects=True,
     )
 
-@app.route('/protected')
+
+@app.route("/protected")
 @login_required
 def protected_route():
-    return jsonify({'status': 1, 'message': 'Access granted'})
+    return jsonify({"status": 1, "message": "Access granted"})
+
 
 def logout(client):
     """Logout helper function"""
     return client.get("/logout", follow_redirects=True)
-
-
-def test_index(client):
-    response = client.get("/", content_type="html/text")
-    assert response.status_code == 200
 
 
 def test_database(client):
@@ -102,16 +98,18 @@ def test_delete_message(client):
     data = json.loads(rv.data)
     assert data["status"] == 1
 
+
 def test_search(client):
-    rv = client.get('/search/')
-    assert rv.status_code == 200 
+    rv = client.get("/search/")
+    assert rv.status_code == 200
+
 
 def test_loggedIn(client):
     """Test accessing the protected route when the user is logged in."""
     login(client, app.config["USERNAME"], app.config["PASSWORD"])
 
-    rv = client.get('/protected')  
+    rv = client.get("/protected")
     data = json.loads(rv.data)
-    assert rv.status_code == 200  
-    assert data['status'] == 1     
-    assert data['message'] == 'Access granted'
+    assert rv.status_code == 200
+    assert data["status"] == 1
+    assert data["message"] == "Access granted"
